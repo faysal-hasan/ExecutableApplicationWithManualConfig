@@ -1,0 +1,54 @@
+Source: https://www.baeldung.com/executable-jar-with-maven
+
+# Manual Configuration
+Let's start with a manual approach – with the help of the maven-dependency-plugin.
+
+First, we'll copy all required dependencies into the folder that we'll specify:
+
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-dependency-plugin</artifactId>
+    <executions>
+        <execution>
+            <id>copy-dependencies</id>
+            <phase>prepare-package</phase>
+            <goals>
+                <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+                <outputDirectory>
+                    ${project.build.directory}/libs
+                </outputDirectory>
+            </configuration>
+        </execution>
+    </executions>
+</plugin>
+There are two important aspects to notice. First, we specify the goal copy-dependencies, which tells Maven to copy these dependencies into the specified outputDirectory.
+
+In our case, we'll create a folder named libs, inside the project build directory (which is usually the target folder).
+
+In the second step, we are going to create executable and class path aware jar, with the link to the dependencies copied in the first step:
+
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-jar-plugin</artifactId>
+    <configuration>
+        <archive>
+            <manifest>
+                <addClasspath>true</addClasspath>
+                <classpathPrefix>libs/</classpathPrefix>
+                <mainClass>
+                    org.baeldung.executable.ExecutableMavenJar
+                </mainClass>
+            </manifest>
+        </archive>
+    </configuration>
+</plugin>
+The most important part of above-mentioned is the manifest configuration. We add a classpath, with all dependencies (folder libs/), and provide the information about the main class.
+
+Please note, that we need to provide fully qualified named of the class, which means it will include package name.
+
+The advantages and disadvantages of this approach are:
+
+pros – transparent process, where we can specify each step
+cons – manual, dependencies are out of the final jar, which means that your executable jar will only run if the libs folder will be accessible and visible for a jar
